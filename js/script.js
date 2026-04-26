@@ -3,9 +3,30 @@ console.log("script.js connected!");
 let weatherDisplay = document.getElementById("weather_display");
 
 function updateWeather() {
-  if (weatherDisplay) {
-    weatherDisplay.innerHTML = "🌤️ Weather: 72°F Sunny";
-  }
+  if (!weatherDisplay) return;
+  
+  let lat = 41.88;
+  let lon = -87.63;
+  let url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
+  
+  fetch(url)
+    .then(function(response) {
+      if (response.ok) {
+        return response.json();
+      } else {
+        weatherDisplay.innerHTML = "🌤️ Weather: 72°F Sunny";
+      }
+    })
+    .then(function(data) {
+      if (data && data.current_weather) {
+        let temp = Math.round(data.current_weather.temperature);
+        weatherDisplay.innerHTML = "🌤️ Chicago: " + temp + "°F";
+      }
+    })
+    .catch(function(error) {
+      console.log("Weather error:", error);
+      weatherDisplay.innerHTML = "🌤️ Chicago: 72°F";
+    });
 }
 
 updateWeather();
@@ -16,43 +37,60 @@ let saveBtn = document.getElementById("save_entry_btn");
 let journalText = document.getElementById("journal_text");
 let entriesList = document.getElementById("entries_list");
 
+function loadEntries() {
+    let savedEntries = localStorage.getItem("journalEntries");
+    if (savedEntries) {
+        let entries = JSON.parse(savedEntries);
+        entriesList.innerHTML = "";
+        for (let i = 0; i < entries.length; i++) {
+            let entryDiv = document.createElement("div");
+            entryDiv.className = "entry-item";
+            entryDiv.innerHTML = "<strong>" + entries[i].date + "</strong> " + entries[i].mood + " - " + entries[i].text;
+            entriesList.appendChild(entryDiv);
+        }
+    }
+}
+
 if (moodBtns.length > 0) {
-  for (let i = 0; i < moodBtns.length; i++) {
-    moodBtns[i].addEventListener("click", function() {
-      for (let j = 0; j < moodBtns.length; j++) {
-        moodBtns[j].classList.remove("selected");
-      }
-      this.classList.add("selected");
-      selectedMood = this.getAttribute("data-mood");
-      console.log("Mood selected:", selectedMood);
-    });
-  }
+    for (let i = 0; i < moodBtns.length; i++) {
+        moodBtns[i].addEventListener("click", function() {
+            for (let j = 0; j < moodBtns.length; j++) {
+                moodBtns[j].classList.remove("selected");
+            }
+            this.classList.add("selected");
+            selectedMood = this.getAttribute("data-mood");
+            console.log("Mood selected:", selectedMood);
+        });
+    }
 }
 
 if (saveBtn) {
-  saveBtn.addEventListener("click", function() {
-    let text = journalText.value.trim();
-    
-    if (text === "") {
-      alert("Please write something before saving!");
-      return;
-    }
-    
-    let now = new Date();
-    let dateStr = now.toLocaleDateString();
-    let entryDiv = document.createElement("div");
-    entryDiv.className = "entry-item";
-    entryDiv.innerHTML = "<strong>" + dateStr + "</strong> " + selectedMood + " - " + text;
-    
-    if (entriesList.innerHTML.includes("No entries yet")) {
-      entriesList.innerHTML = "";
-    }
-    entriesList.insertBefore(entryDiv, entriesList.firstChild);
-    
-    journalText.value = "";
-    console.log("Journal entry saved!");
-  });
+    saveBtn.addEventListener("click", function() {
+        let text = journalText.value.trim();
+        
+        if (text === "") {
+            alert("Please write something before saving!");
+            return;
+        }
+        
+        let now = new Date();
+        let dateStr = now.toLocaleDateString();
+        
+        let entries = JSON.parse(localStorage.getItem("journalEntries")) || [];
+        
+        entries.unshift({ date: dateStr, mood: selectedMood, text: text });
+        
+        localStorage.setItem("journalEntries", JSON.stringify(entries));
+        
+        loadEntries();
+        
+        journalText.value = "";
+        
+        console.log("Journal entry saved!");
+    });
 }
+
+loadEntries();
 
 let quoteDisplay = document.getElementById("quote_display");
 let quoteAuthor = document.getElementById("quote_author");
@@ -97,6 +135,48 @@ let taskList = document.getElementById("task_list");
 let progressCountSpan = document.getElementById("progress_count");
 let progressBar = document.getElementById("progress_bar");
 
+function loadTasks() {
+    let savedTasks = localStorage.getItem("tasks");
+    if (savedTasks) {
+        let tasks = JSON.parse(savedTasks);
+        taskList.innerHTML = "";
+        for (let i = 0; i < tasks.length; i++) {
+            let newLi = document.createElement("li");
+            newLi.className = "task-item";
+            let checkedAttr = tasks[i].checked ? 'checked' : '';
+            newLi.innerHTML = '<input type="checkbox" class="task-checkbox" ' + checkedAttr + '> ' + tasks[i].name + ' <span class="badge-secondary">' + tasks[i].date + '</span>';
+            taskList.appendChild(newLi);
+        }
+        updateProgress();
+        attachCheckboxListeners();
+    }
+}
+
+function attachCheckboxListeners() {
+    let checkboxes = document.querySelectorAll("#task_list .task-checkbox");
+    for (let i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener("change", function() {
+            updateProgress();
+            saveTasksToLocal();
+        });
+    }
+}
+
+function saveTasksToLocal() {
+    let tasks = [];
+    let taskItems = document.querySelectorAll("#task_list .task-item");
+    for (let i = 0; i < taskItems.length; i++) {
+        let checkbox = taskItems[i].querySelector(".task-checkbox");
+        let name = taskItems[i].childNodes[2].nodeValue.trim();
+        tasks.push({ 
+            name: name, 
+            checked: checkbox.checked, 
+            date: "pending"
+        });
+    }
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
 function updateProgress() {
   if (!taskList) return;
   let checkboxes = document.querySelectorAll("#task_list .task-checkbox");
@@ -126,26 +206,19 @@ if (addTaskBtn) {
       return;
     }
     
-    let newLi = document.createElement("li");
-    newLi.className = "task-item";
-    newLi.innerHTML = '<input type="checkbox" class="task-checkbox"> ' + taskName + ' <span class="badge-secondary">new</span>';
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    tasks.push({ name: taskName, checked: false, date: "new" });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
     
-    taskList.appendChild(newLi);
+    loadTasks();
     taskInput.value = "";
-    
-    let newCheckbox = newLi.querySelector(".task-checkbox");
-    newCheckbox.addEventListener("change", updateProgress);
-    updateProgress();
     console.log("Task added:", taskName);
   });
 }
 
-let existingCheckboxes = document.querySelectorAll("#task_list .task-checkbox");
-for (let i = 0; i < existingCheckboxes.length; i++) {
-  existingCheckboxes[i].addEventListener("change", updateProgress);
+if (taskList) {
+    loadTasks();
 }
-
-updateProgress();
 
 let joinStudyBtn = document.getElementById("join_study_btn");
 if (joinStudyBtn) {
@@ -157,7 +230,7 @@ if (joinStudyBtn) {
 let addClassBtn = document.getElementById("add_class_btn");
 if (addClassBtn) {
   addClassBtn.addEventListener("click", function() {
-    alert("Add class feature will be available in the final version. You'll be able to add your own classes!");
+    alert("Add class feature will be available in the final version.");
   });
 }
 
