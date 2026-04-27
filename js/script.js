@@ -1,4 +1,7 @@
+// confirms if js is connected
 console.log("script.js connected");
+
+// Gets current weather for Chicago from Open-Meteo
 
 let weatherDisplay = document.getElementById("weather_display");
 
@@ -35,6 +38,8 @@ function updateWeather() {
 
 updateWeather();
 
+// Checks if entries_list exists to determine if we're on the home page
+
 let entriesList = document.getElementById("entries_list");
 
 if (entriesList) {
@@ -43,6 +48,7 @@ if (entriesList) {
   let saveBtn = document.getElementById("save_entry_btn");
   let journalText = document.getElementById("journal_text");
 
+  // Load saved journal entries from localStorage
   function loadEntries() {
     let savedEntries = localStorage.getItem("journalEntries");
     if (savedEntries) {
@@ -57,6 +63,7 @@ if (entriesList) {
     }
   }
 
+  // Add click listeners to mood buttons so its working
   if (moodBtns.length > 0) {
     for (let i = 0; i < moodBtns.length; i++) {
       moodBtns[i].addEventListener("click", function() {
@@ -69,6 +76,7 @@ if (entriesList) {
     }
   }
 
+  // Save new journal entry to localStorage
   if (saveBtn) {
     saveBtn.addEventListener("click", function() {
       let text = journalText.value.trim();
@@ -82,19 +90,18 @@ if (entriesList) {
       let dateStr = now.toLocaleDateString();
       
       let entries = JSON.parse(localStorage.getItem("journalEntries")) || [];
-      
       entries.unshift({ date: dateStr, mood: selectedMood, text: text });
-      
       localStorage.setItem("journalEntries", JSON.stringify(entries));
       
       loadEntries();
-      
       journalText.value = "";
     });
   }
 
   loadEntries();
 }
+
+// Fetches random motivational quotes from ZenQuotes API
 
 let quoteDisplay = document.getElementById("quote_display");
 
@@ -126,6 +133,7 @@ if (quoteDisplay) {
 
   fetchQuote();
 
+  // New quote button fetches another random quote
   let newQuoteBtn = document.getElementById("new_quote_btn");
   if (newQuoteBtn) {
     newQuoteBtn.addEventListener("click", function() {
@@ -133,6 +141,8 @@ if (quoteDisplay) {
     });
   }
 }
+
+// Checks if add_task_btn exists 
 
 let addTaskBtn = document.getElementById("add_task_btn");
 
@@ -143,6 +153,7 @@ if (addTaskBtn) {
   let progressBar = document.getElementById("progress_bar");
   let totalTasksSpan = document.getElementById("total_tasks");
 
+  // Update progress bar based on how many tasks are checked
   function updateProgress() {
     let checkboxes = document.querySelectorAll(".task-checkbox");
     let total = checkboxes.length;
@@ -164,6 +175,7 @@ if (addTaskBtn) {
     }
   }
 
+  // Add change listeners to all checkboxes
   function setupCheckboxes() {
     let checkboxes = document.querySelectorAll(".task-checkbox");
     for (let i = 0; i < checkboxes.length; i++) {
@@ -171,6 +183,7 @@ if (addTaskBtn) {
     }
   }
 
+  // Add a new task to the list
   addTaskBtn.addEventListener("click", function() {
     let taskName = taskInput.value.trim();
     if (taskName === "") {
@@ -195,6 +208,7 @@ if (addTaskBtn) {
   updateProgress();
 }
 
+
 let joinStudyBtn = document.getElementById("join_study_btn");
 if (joinStudyBtn) {
   joinStudyBtn.addEventListener("click", function() {
@@ -215,6 +229,5 @@ if (addStudyBtn) {
     alert("Coming soon!");
   });
 }
-
 
 console.log("JavaScript loaded");
