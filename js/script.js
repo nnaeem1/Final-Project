@@ -7,14 +7,14 @@ function updateWeather() {
   
   let lat = 41.88;
   let lon = -87.63;
-  let url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
+  let url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&temperature_unit=fahrenheit";
   
   fetch(url)
     .then(function(response) {
       if (response.ok) {
         return response.json();
       } else {
-        weatherDisplay.innerHTML = "🌤️ Weather: 72°F Sunny";
+        weatherDisplay.innerHTML = "🌤️ Chicago: 52°F";
       }
     })
     .then(function(data) {
@@ -25,7 +25,7 @@ function updateWeather() {
     })
     .catch(function(error) {
       console.log("Weather error:", error);
-      weatherDisplay.innerHTML = "🌤️ Chicago: 72°F";
+      weatherDisplay.innerHTML = "🌤️ Chicago: 52°F";
     });
 }
 
