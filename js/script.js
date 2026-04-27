@@ -99,6 +99,42 @@ if (entriesList) {
   }
 
   loadEntries();
+  
+  // Load UNCHECKED tasks from localStorage and display on Home page
+  function loadTasksOnHome() {
+    let deadlinesList = document.getElementById("deadlines_list");
+    if (!deadlinesList) return;
+    
+    let savedTasks = localStorage.getItem("tasks");
+    if (savedTasks) {
+      let tasks = JSON.parse(savedTasks);
+      deadlinesList.innerHTML = "";
+      
+      // Only show tasks that are NOT checked (incomplete tasks)
+      let incompleteTasks = [];
+      for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].checked) {
+          incompleteTasks.push(tasks[i]);
+        }
+      }
+      
+      let tasksToShow = incompleteTasks.slice(0, 3);
+      
+      for (let i = 0; i < tasksToShow.length; i++) {
+        let taskLi = document.createElement("li");
+        taskLi.innerHTML = tasksToShow[i].name;
+        deadlinesList.appendChild(taskLi);
+      }
+      
+      if (tasksToShow.length === 0) {
+        deadlinesList.innerHTML = "<li>No pending tasks. Great job!</li>";
+      }
+    } else {
+      deadlinesList.innerHTML = "<li>No tasks yet. Add some on Tasks page!</li>";
+    }
+  }
+  
+  loadTasksOnHome();
 }
 
 // Fetches random motivational quotes from ZenQuotes API
@@ -173,6 +209,14 @@ if (addTaskBtn) {
       progressBar.style.width = percent + "%";
       progressBar.textContent = percent + "%";
     }
+    
+    saveTasksToLocal();
+    
+    // Update the Home page deadlines if we're on the Home page
+    let deadlinesList = document.getElementById("deadlines_list");
+    if (deadlinesList) {
+      loadTasksOnHome();
+    }
   }
 
   // Add change listeners to all checkboxes
@@ -180,6 +224,88 @@ if (addTaskBtn) {
     let checkboxes = document.querySelectorAll(".task-checkbox");
     for (let i = 0; i < checkboxes.length; i++) {
       checkboxes[i].addEventListener("change", updateProgress);
+    }
+  }
+
+  // Save tasks to localStorage using a simple array
+  function saveTasksToLocal() {
+    let tasks = [];
+    let taskItems = document.querySelectorAll(".task-item");
+    
+    for (let i = 0; i < taskItems.length; i++) {
+      let checkbox = taskItems[i].querySelector(".task-checkbox");
+      let span = taskItems[i].querySelector("span");
+      let taskText = "";
+      
+      if (span) {
+        taskText = span.previousSibling.nodeValue.trim();
+      } else {
+        taskText = taskItems[i].innerText.replace("new", "").trim();
+      }
+      
+      tasks.push({
+        name: taskText,
+        checked: checkbox ? checkbox.checked : false
+      });
+    }
+    
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    console.log("Tasks saved:", tasks);
+  }
+
+  // Function to reload tasks on Home page (made global so Home page can call it)
+  window.loadTasksOnHome = function() {
+    let deadlinesList = document.getElementById("deadlines_list");
+    if (!deadlinesList) return;
+    
+    let savedTasks = localStorage.getItem("tasks");
+    if (savedTasks) {
+      let tasks = JSON.parse(savedTasks);
+      deadlinesList.innerHTML = "";
+      
+      // Only show tasks that are NOT checked (incomplete tasks)
+      let incompleteTasks = [];
+      for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].checked) {
+          incompleteTasks.push(tasks[i]);
+        }
+      }
+      
+      let tasksToShow = incompleteTasks.slice(0, 3);
+      
+      for (let i = 0; i < tasksToShow.length; i++) {
+        let taskLi = document.createElement("li");
+        taskLi.innerHTML = tasksToShow[i].name;
+        deadlinesList.appendChild(taskLi);
+      }
+      
+      if (tasksToShow.length === 0) {
+        deadlinesList.innerHTML = "<li>No pending tasks. Great job!</li>";
+      }
+    } else {
+      deadlinesList.innerHTML = "<li>No tasks yet. Add some on Tasks page!</li>";
+    }
+  };
+
+  // Load tasks from localStorage
+  function loadTasksFromLocal() {
+    let savedTasks = localStorage.getItem("tasks");
+    console.log("Loading tasks from localStorage:", savedTasks);
+    
+    if (savedTasks && taskList) {
+      let tasks = JSON.parse(savedTasks);
+      taskList.innerHTML = "";
+      
+      for (let i = 0; i < tasks.length; i++) {
+        let newLi = document.createElement("li");
+        newLi.className = "task-item";
+        let checkedAttr = tasks[i].checked ? 'checked' : '';
+        newLi.innerHTML = '<input type="checkbox" class="task-checkbox" ' + checkedAttr + '> ' + tasks[i].name + ' <span class="badge-secondary">task</span>';
+        taskList.appendChild(newLi);
+      }
+      
+      setupCheckboxes();
+      updateProgress();
     }
   }
 
@@ -201,13 +327,15 @@ if (addTaskBtn) {
     let newCheckbox = newLi.querySelector(".task-checkbox");
     newCheckbox.addEventListener("change", updateProgress);
     
+    saveTasksToLocal();
     updateProgress();
+    
+    console.log("Task added:", taskName);
   });
 
   setupCheckboxes();
-  updateProgress();
+  loadTasksFromLocal();
 }
-
 
 let joinStudyBtn = document.getElementById("join_study_btn");
 if (joinStudyBtn) {
