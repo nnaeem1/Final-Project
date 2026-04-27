@@ -1,4 +1,3 @@
-
 /* Backgorund color and the default font */
 body {
   background-color: #0d434d; 
@@ -216,39 +215,6 @@ h3 {
   cursor: pointer;
 }
 
-.badge-danger {
-  background-color: #dc3545;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-left: auto;
-}
-
-.badge-warning {
-  background-color: #ffc107;
-  color: #000;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-left: auto;
-}
-
-.badge-success {
-  background-color: #198754;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-left: auto;
-}
-
-.badge-secondary {
-  background-color: #6c757d;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  margin-left: auto;
-}
-
 .add-task-area {
   display: flex;
   gap: 10px;
@@ -365,9 +331,5 @@ h3 {
   
   .task-item {
     flex-wrap: wrap;
-  }
-  
-  .badge-danger, .badge-warning, .badge-success, .badge-secondary {
-    margin-left: 0;
   }
 }
