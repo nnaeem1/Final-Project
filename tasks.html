@@ -19,6 +19,7 @@
       </div>
     </header>
 
+    <!-- Navigation bar -->
     <nav id="main_nav">
       <a href="index.html" class="btn btn-outline-primary">Home</a>
       <a href="tasks.html" class="btn btn-primary">Tasks</a>
@@ -30,16 +31,19 @@
       <section id="tasks_section">
         <h2>📋 My Tasks</h2>
         
+        <!-- Empty task list where users add their own tasks -->
         <ul id="task_list" class="task-list-ul">
         </ul>
         
+        <!-- Area to add new tasks -->
         <div class="add-task-area">
           <input type="text" id="new_task_input" placeholder="New task name...">
           <button id="add_task_btn" class="btn btn-primary">+ Add Task</button>
         </div>
         
+        <!-- Progress bar showing task completion percentage -->
         <div class="progress-area">
-          <p>Weekly Progress: <span id="progress_count">0</span>/<span id="total_tasks">3</span> tasks done</p>
+          <p>Weekly Progress: <span id="progress_count">0</span>/<span id="total_tasks">0</span> tasks done</p>
           <div class="progress-bar-container">
             <div id="progress_bar" class="progress-bar-fill" style="width: 0%">0%</div>
           </div>
